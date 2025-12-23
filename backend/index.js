@@ -46,7 +46,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // true in production with HTTPS
+      secure: true,
+      sameSite: "none",
       httpOnly: true,
     },
   })
