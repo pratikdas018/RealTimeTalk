@@ -50,6 +50,38 @@ export const sendMessage = async (req,res) => {
     }
 }
 
+export const markMessagesAsSeen = async (req, res) => {
+  try {
+    const sender = req.userId;
+    const { receiver } = req.params;
+
+    const conversation = await Conversation.findOne({
+      participants: { $all: [sender, receiver] }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+
+    // Mark all messages from receiver → sender as seen
+    await Message.updateMany(
+      { sender: receiver, receiver: sender, seen: false },
+      { $set: { seen: true } }
+    );
+
+    // Notify the sender (so they can update tick color)
+    const receiverSocketId = getReceiverSocketId(receiver);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messagesSeen", { receiver: sender });
+    }
+
+    return res.status(200).json({ message: "Messages marked as seen" });
+  } catch (error) {
+    return res.status(500).json({ message: `Mark seen error ${error}` });
+  }
+};
+
+
 export const getMessages = async (req,res) => {
         let sender = req.userId
         let {receiver} = req.params

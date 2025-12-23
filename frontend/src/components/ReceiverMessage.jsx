@@ -26,7 +26,7 @@ function ReceiverMessage({ image, message }) {
         shadow-md border border-[#20c7ff]'
       >
         <img
-          src={selectedUser?.image || dp}  // ✅ Fallback ensures DP always shows
+          src={selectedUser?.avatar || dp}  // ✅ Fallback ensures DP always shows
           alt="receiver"
           className='w-full h-full object-cover'
         />

@@ -94,7 +94,7 @@ function SideBar() {
             onClick={() => navigate("/profile")}
           >
             <img
-              src={userData?.image || dp}
+              src={userData?.avatar || dp}
               alt=""
               className='w-full h-full object-cover'
             />
@@ -146,7 +146,7 @@ function SideBar() {
                     onClick={() => dispatch(setSelectedUser(user))}
                   >
                     <img
-                      src={user.image || dp}
+                      src={user.avatar || dp}
                       alt=""
                       className='w-full h-full object-cover'
                     />
@@ -172,7 +172,7 @@ function SideBar() {
           >
             <div className='relative w-[60px] h-[60px] bg-white rounded-full overflow-hidden flex justify-center items-center shadow-gray-400 shadow-md ml-[10px]'>
               <img
-                src={user.image || dp}
+                src={user.avatar || dp}
                 alt=""
                 className='w-full h-full object-cover'
               />
@@ -181,7 +181,7 @@ function SideBar() {
               )}
             </div>
             <h1 className='text-gray-800 font-semibold text-[18px] truncate pr-[15px]'>
-              {user.name || user.userName}
+              {user.fullName || user.name || "User"}
             </h1>
           </div>
         ))}

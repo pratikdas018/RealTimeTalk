@@ -44,7 +44,7 @@ function SenderMessage({ image, message }) {
         shadow-md border border-[rgb(23,151,194)]'
       >
         <img
-          src={userData?.image || dp}
+          src={userData?.avatar || dp}
           alt=""
           className='w-full h-full object-cover'
         />
