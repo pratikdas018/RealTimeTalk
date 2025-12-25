@@ -12,7 +12,10 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "https://realtimetalk-backend.onrender.com/api/auth/google/callback",
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8655fd0 (update)
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
