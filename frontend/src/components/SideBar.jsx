@@ -55,16 +55,20 @@ function SideBar() {
   }, [userData, socket, dispatch]);
 
   // 🔹 Filter users and mark online
-  const filteredUsers = otherUsers?.map(user => ({
+ const filteredUsers = otherUsers
+  ?.map(user => ({
     ...user,
-    isOnline: onlineUsers?.includes(user._id.toString())
-  })).filter(user => {
-    if (!query) return true;
+    isOnline: onlineUsers?.includes(user._id),
+  }))
+  .filter(user => {
+    if (!query.trim()) return true;
+
     return (
-      user.name?.toLowerCase().includes(query.toLowerCase()) ||
-      user.userName?.toLowerCase().includes(query.toLowerCase())
+      user.fullName?.toLowerCase().includes(query.toLowerCase()) ||
+      user.email?.toLowerCase().includes(query.toLowerCase())
     );
   });
+
 
   return (
     <div
