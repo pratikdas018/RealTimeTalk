@@ -90,7 +90,7 @@ function SideBar() {
 
         <div className='w-full flex justify-between items-center mt-2'>
           <h1 className='text-gray-800 font-bold text-[22px] truncate'>
-            Hi, {userData?.name || "User"}
+            Hi, {userData?.fullName || "User"}
           </h1>
 
           <div
