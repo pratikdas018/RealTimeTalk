@@ -1,16 +1,34 @@
 import genToken from "../config/token.js";
+import User from "../models/user.model.js";
 
 export const googleSuccess = async (req, res) => {
-  const user = req.user;
+  try {
+    if (!req.user) {
+      console.error("Google login failed: req.user missing");
+      return res.redirect(
+        "https://realtimetalk-frontend.onrender.com/login"
+      );
+    }
 
-  const token = await genToken(user._id);
+    // Create JWT
+    const token = await genToken(req.user._id);
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: "Strict",
-    secure: false,
-  });
+    // Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-  res.redirect("https://realtimetalk-frontend.onrender.com");
+    // Redirect to frontend
+    return res.redirect(
+      "https://realtimetalk-frontend.onrender.com"
+    );
+  } catch (error) {
+    console.error("Google callback error:", error);
+    return res.redirect(
+      "https://realtimetalk-frontend.onrender.com/login"
+    );
+  }
 };
