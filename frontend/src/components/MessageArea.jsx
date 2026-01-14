@@ -86,7 +86,13 @@ function MessageArea() {
         { withCredentials: true }
       );
 
-      dispatch(addMessage(res.data)); // ✅ instant UI update
+      dispatch(
+  addMessage({
+    ...res.data,
+    sender: userData._id,   // 🔥 FORCE sender to be ID
+  })
+);
+ // ✅ instant UI update
       setInput("");
       setFrontendImage(null);
       setBackendImage(null);
