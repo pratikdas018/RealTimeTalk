@@ -30,6 +30,11 @@ function MessageArea() {
   const [frontendImage, setFrontendImage] = useState(null);
   const [backendImage, setBackendImage] = useState(null);
   const image = useRef();
+  const bottomRef = useRef(null);
+  useEffect(() => {
+  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages]);
+
 
   /* ================= FETCH MESSAGES ================= */
   useEffect(() => {
@@ -101,8 +106,11 @@ function MessageArea() {
     if (!socket) return;
 
     const onNewMessage = (msg) => {
-      dispatch(addMessage(msg));
-    };
+  // ❌ Don't re-add sender's own message
+  if (String(msg.sender) === String(userData._id)) return;
+  dispatch(addMessage(msg));
+};
+
 
     const onMessagesSeen = ({ receiver }) => {
       dispatch(updateSeenMessages(receiver));
@@ -157,12 +165,13 @@ function MessageArea() {
 
             {Array.isArray(messages) &&
               messages.map((m) =>
-                m.sender === userData._id ? (
-                  <SenderMessage key={m._id} {...m} />
-                ) : (
-                  <ReceiverMessage key={m._id} {...m} />
-                )
-              )}
+  String(m.sender) === String(userData._id) ? (
+    <SenderMessage key={m._id} {...m} />
+  ) : (
+    <ReceiverMessage key={m._id} {...m} />
+  )
+)}
+<div ref={bottomRef} />
           </div>
         </div>
       ) : null}
