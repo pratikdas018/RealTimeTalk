@@ -76,3 +76,9 @@ export const initSocket = (server) => {
 
 export const getReceiverSocketId = (receiverId) =>
   userSocketMap[receiverId];
+// ADD BELOW existing code in socket.js
+
+export const emitToSocket = (socketId, event, payload) => {
+  if (!io) return;
+  io.to(socketId).emit(event, payload);
+};
