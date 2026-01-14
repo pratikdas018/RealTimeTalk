@@ -12,5 +12,5 @@ export const googleSuccess = async (req, res) => {
     secure: false,
   });
 
-  res.redirect("http://localhost:5173");
+  res.redirect("https://realtimetalk-frontend.onrender.com");
 };
