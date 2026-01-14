@@ -42,9 +42,13 @@ authRouter.get(
 authRouter.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "/login",
-    session: false,
-  }),
+  failureRedirect:
+    process.env.NODE_ENV === "production"
+      ? "https://realtimetalk-frontend.onrender.com/login"
+      : "http://localhost:5173/login",
+  session: false,
+}),
+
   async (req, res) => {
     const token = await genToken(req.user._id);
 
