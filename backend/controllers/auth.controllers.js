@@ -96,7 +96,6 @@ export const resendOtp = async (req, res) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -105,10 +104,18 @@ export const resendOtp = async (req, res) => {
       return res.status(400).json({ message: "Email already verified" });
     }
 
-    const otp = await sendOtp(email);
+    let otp;
+    try {
+      otp = await sendOtp(email);
+    } catch (err) {
+      console.error("Resend OTP failed:", err.message);
+      return res.status(500).json({
+        message: "Unable to resend OTP. Please try again later.",
+      });
+    }
 
     user.otp = otp;
-    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
+    user.otpExpiry = Date.now() + 10 * 60 * 1000;
     await user.save();
 
     return res.status(200).json({
@@ -118,6 +125,7 @@ export const resendOtp = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 /* ================= LOGIN ================= */
 export const login = async (req, res) => {
