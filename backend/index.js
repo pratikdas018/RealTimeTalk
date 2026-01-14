@@ -4,7 +4,6 @@ dotenv.config();
 
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 import passport from "passport";
 
 import connectDb from "./config/db.js";
@@ -18,6 +17,9 @@ import "./config/passport.js";
 
 const port = process.env.PORT || 8000;
 
+/* ---------------- TRUST PROXY (IMPORTANT) ---------------- */
+app.set("trust proxy", 1);
+
 /* -------------------- CORS -------------------- */
 
 const allowedOrigins = [
@@ -27,18 +29,16 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+
+      return callback(new Error("CORS not allowed"));
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -47,23 +47,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  session({
-    name: "talksy.sid",
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-    },
-  })
-);
+/* -------------------- PASSPORT -------------------- */
 
-// Passport
 app.use(passport.initialize());
-app.use(passport.session());
 
 /* -------------------- ROUTES -------------------- */
 
