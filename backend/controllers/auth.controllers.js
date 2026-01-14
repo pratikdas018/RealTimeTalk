@@ -8,12 +8,10 @@ export const signUp = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
-    // ✅ Correct validation
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // ✅ Check email only (username removed)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
@@ -27,8 +25,15 @@ export const signUp = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔐 Send OTP
-    const otp = await sendOtp(email);
+    let otp;
+    try {
+      otp = await sendOtp(email);
+    } catch (err) {
+      console.error("OTP email failed:", err.message);
+      return res.status(500).json({
+        message: "Unable to send OTP email. Please try again later.",
+      });
+    }
 
     await User.create({
       fullName,
@@ -50,6 +55,7 @@ export const signUp = async (req, res) => {
       .json({ message: "Signup failed. Please try again." });
   }
 };
+
 
 
 /* ================= VERIFY OTP ================= */
