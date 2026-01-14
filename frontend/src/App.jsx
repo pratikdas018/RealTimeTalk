@@ -14,20 +14,29 @@ import Footer from './components/Footer'
 import VerifyOtp from "./pages/VerifyOtp";
 
 function App() {
-  getCurrentUser()
-  getOtherUsers()
-  const { userData, socket } = useSelector(state => state.user)
   const dispatch = useDispatch()
+  const { userData, socket } = useSelector(state => state.user)
 
+  // ✅ Fetch auth data ONCE (production-safe)
+  useEffect(() => {
+    getCurrentUser()
+    getOtherUsers()
+  }, [])
+
+  // ✅ Socket logic (already correct)
   useEffect(() => {
     if (userData) {
-      const socketio = io(`${serverUrl}`, {
-        query: { userId: userData?._id }
+      const socketio = io(serverUrl, {
+        query: { userId: userData?._id },
+        withCredentials: true,
       })
+
       dispatch(setSocket(socketio))
+
       socketio.on("getOnlineUsers", (users) => {
         dispatch(setOnlineUsers(users))
       })
+
       return () => socketio.close()
     } else {
       if (socket) {
@@ -39,7 +48,6 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Main content area */}
       <div className="flex-grow">
         <Routes>
           <Route path='/login' element={!userData ? <Login /> : <Navigate to="/" />} />
@@ -49,8 +57,6 @@ function App() {
           <Route path='/profile' element={userData ? <Profile /> : <Navigate to="/signup" />} />
         </Routes>
       </div>
-
-      {/* Footer always visible */}
       <Footer />
     </div>
   )
