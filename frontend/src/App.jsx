@@ -17,17 +17,14 @@ function App() {
   const dispatch = useDispatch()
   const { userData, socket } = useSelector(state => state.user)
 
-  // ✅ Fetch auth data ONCE (production-safe)
-  useEffect(() => {
-    getCurrentUser()
-    getOtherUsers()
-  }, [])
+  // ✅ Correct hook usage
+  useGetCurrentUser()
+  useGetOtherUsers()
 
-  // ✅ Socket logic (already correct)
   useEffect(() => {
     if (userData) {
       const socketio = io(serverUrl, {
-        query: { userId: userData?._id },
+        query: { userId: userData._id },
         withCredentials: true,
       })
 
@@ -38,11 +35,9 @@ function App() {
       })
 
       return () => socketio.close()
-    } else {
-      if (socket) {
-        socket.close()
-        dispatch(setSocket(null))
-      }
+    } else if (socket) {
+      socket.close()
+      dispatch(setSocket(null))
     }
   }, [userData])
 
