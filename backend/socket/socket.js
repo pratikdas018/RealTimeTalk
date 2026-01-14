@@ -8,26 +8,33 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://realtimetalk-frontend.onrender.com",
+    ],
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-const userSocketMap = {}; // store userId => socketId
+const userSocketMap = {}; // userId => socketId
 
-export const getReceiverSocketId = (receiver) => {
-  return userSocketMap[receiver];
+export const getReceiverSocketId = (receiverId) => {
+  return userSocketMap[receiverId];
 };
 
 io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
   const userId = socket.handshake.query.userId;
+
   if (userId) {
     userSocketMap[userId] = socket.id;
   }
 
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  // ✅ Send Message
+  // ✅ Send message
   socket.on("sendMessage", async (data) => {
     try {
       const { sender, receiver, message, image } = data;
@@ -43,24 +50,27 @@ io.on("connection", (socket) => {
       const receiverSocketId = userSocketMap[receiver];
 
       if (receiverSocketId) {
-        // mark as delivered if receiver is online
         newMessage.status = "delivered";
         await newMessage.save();
+
         io.to(receiverSocketId).emit("newMessage", newMessage);
       }
 
-      // sender confirmation
       io.to(socket.id).emit("messageSent", newMessage);
     } catch (error) {
-      console.error("Socket sendMessage error:", error.message);
+      console.error("Socket sendMessage error:", error);
     }
   });
 
-  // ✅ Mark Messages as Seen
+  // ✅ Mark messages as seen
   socket.on("markAsSeen", async ({ senderId, receiverId }) => {
     try {
       await Message.updateMany(
-        { sender: senderId, receiver: receiverId, status: { $ne: "seen" } },
+        {
+          sender: senderId,
+          receiver: receiverId,
+          status: { $ne: "seen" },
+        },
         { $set: { status: "seen" } }
       );
 
@@ -69,12 +79,17 @@ io.on("connection", (socket) => {
         io.to(senderSocketId).emit("messagesSeen", { receiverId });
       }
     } catch (error) {
-      console.error("Socket markAsSeen error:", error.message);
+      console.error("Socket markAsSeen error:", error);
     }
   });
 
   socket.on("disconnect", () => {
-    delete userSocketMap[userId];
+    console.log("Socket disconnected:", socket.id);
+
+    if (userId) {
+      delete userSocketMap[userId];
+    }
+
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
