@@ -1,3 +1,4 @@
+import http from "http";
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
@@ -10,56 +11,40 @@ import connectDb from "./config/db.js";
 import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
 import messageRouter from "./routes/message.routes.js";
-import { app, server } from "./socket/socket.js";
-
-// Passport config
 import "./config/passport.js";
+import { initSocket } from "./socket/socket.js";
 
-const port = process.env.PORT || 8000;
+const app = express();
+const server = http.createServer(app);
 
-/* ---------------- TRUST PROXY (IMPORTANT) ---------------- */
+/* TRUST PROXY */
 app.set("trust proxy", 1);
 
-/* -------------------- CORS -------------------- */
-
-const allowedOrigins = [
-  "https://realtimetalk-frontend.onrender.com",
-  "http://localhost:5173",
-];
-
+/* CORS */
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("CORS not allowed"));
-    },
+    origin: [
+      "http://localhost:5173",
+      "https://realtimetalk-frontend.onrender.com",
+    ],
     credentials: true,
   })
 );
 
-/* -------------------- MIDDLEWARES -------------------- */
-
 app.use(express.json());
 app.use(cookieParser());
-
-/* -------------------- PASSPORT -------------------- */
-
 app.use(passport.initialize());
-
-/* -------------------- ROUTES -------------------- */
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/message", messageRouter);
 
-/* -------------------- SERVER -------------------- */
+/* INIT SOCKET WITH SAME SERVER */
+initSocket(server);
 
-server.listen(port, async () => {
+const PORT = process.env.PORT || 8000;
+
+server.listen(PORT, async () => {
   await connectDb();
-  console.log(`🚀 Server running on port ${port}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
