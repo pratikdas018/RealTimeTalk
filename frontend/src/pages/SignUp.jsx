@@ -21,7 +21,8 @@ function SignUp() {
     try {
       const res = await axios.post(
         `${serverUrl}/api/auth/signup`,
-        { fullName, email, password }
+        { fullName, email, password },
+        { withCredentials: true }
       );
 
       alert(res.data.message);
