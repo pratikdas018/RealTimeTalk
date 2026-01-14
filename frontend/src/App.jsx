@@ -18,8 +18,8 @@ function App() {
   const { userData, socket } = useSelector(state => state.user)
 
   // ✅ Correct hook usage
-  useGetCurrentUser()
-  useGetOtherUsers()
+  getCurrentUser()
+  getOtherUsers()
 
   useEffect(() => {
     if (userData) {
